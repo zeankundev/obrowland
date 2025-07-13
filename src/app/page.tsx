@@ -40,6 +40,7 @@ export default function Home() {
             ))}
             <div className={styles['message-field-combo']}>
                 <textarea 
+                    placeholder="Ask Hack Club AI anything"
                     value={messageStringCache}
                     onChange={(e) => {setMessageStringCache(e.target.value)}}
                     onKeyDown={(e) => {

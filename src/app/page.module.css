@@ -1,6 +1,23 @@
+.page {
+    padding: 15px;
+}
+.message-field-combo {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+    background-color: var(--secondary);
+    display: flex;
+    padding: 20px;
+    border-radius: 20px;
+}
 .message-field-combo textarea {
     font-family: 'TikTok Sans', sans-serif;
     -webkit-appearance: none;
+    background-color: var(--secondary);
     border: none;
     resize: none;
+    margin-bottom: none;
+    flex: 1;
+    outline: none;
 }
