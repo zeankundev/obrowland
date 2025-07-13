@@ -2,6 +2,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { useState } from "react";
+import Markdown from 'react-markdown'
 
 interface Message {
     role: string,
@@ -35,7 +36,7 @@ export default function Home() {
         <div className={styles.page}>
             {messages.map((message, index) => (
                 <div className={styles.message} key={index}>
-                    <b>{message.role}</b>: {message.content}
+                    <b>{message.role}</b>: <div><Markdown>{message.content}</Markdown></div>
                 </div>
             ))}
             <div className={styles['message-field-combo']}>
