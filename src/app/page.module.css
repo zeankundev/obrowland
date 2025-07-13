@@ -24,4 +24,27 @@
 .messages-container {
     max-height: 77vh;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.messages-container .message {
+    background-color: var(--secondary);
+    max-width: fit-content;
+    padding: 20px;
+    border-radius: 30px;
+}
+.messages-container .message ol,
+.messages-container .message ul {
+    margin-left: 20px;
+}
+.messages-container .message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+    border-bottom-right-radius: 10px;
+}
+.messages-container .message.assistant {
+    align-self: flex-start;
+    flex-direction: row;
+    border-top-left-radius: 5px;
 }

@@ -36,8 +36,8 @@ export default function Home() {
         <div className={styles.page}>
             <div className={styles['messages-container']}>
                 {messages.map((message, index) => (
-                    <div className={styles.message} key={index}>
-                        <b>{message.role}</b>: <div><Markdown>{message.content}</Markdown></div>
+                    <div className={`${styles.message} ${styles[message.role]}`} key={index}>
+                        <div><Markdown>{message.content}</Markdown></div>
                     </div>
                 ))}
             </div>
