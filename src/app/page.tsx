@@ -34,11 +34,13 @@ export default function Home() {
     }
     return (
         <div className={styles.page}>
-            {messages.map((message, index) => (
-                <div className={styles.message} key={index}>
-                    <b>{message.role}</b>: <div><Markdown>{message.content}</Markdown></div>
-                </div>
-            ))}
+            <div className={styles['messages-container']}>
+                {messages.map((message, index) => (
+                    <div className={styles.message} key={index}>
+                        <b>{message.role}</b>: <div><Markdown>{message.content}</Markdown></div>
+                    </div>
+                ))}
+            </div>
             <div className={styles['message-field-combo']}>
                 <textarea 
                     placeholder="Ask Hack Club AI anything"

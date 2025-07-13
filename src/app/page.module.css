@@ -2,7 +2,7 @@
     padding: 15px;
 }
 .message-field-combo {
-    position: absolute;
+    position: fixed;
     bottom: 15px;
     left: 15px;
     right: 15px;
@@ -20,4 +20,8 @@
     margin-bottom: none;
     flex: 1;
     outline: none;
+}
+.messages-container {
+    max-height: 77vh;
+    padding: 15px;
 }
