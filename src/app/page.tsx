@@ -2,7 +2,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import React, { Component, useState } from "react";
-import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import Markdown, { Components } from 'react-markdown'
 
 interface Message {
@@ -122,17 +122,7 @@ export default function Home() {
                     messages.map((message, index) => (
                         <div className={`${styles.message} ${styles[message.role]}`} key={index}>
                             <div>
-                                <Markdown
-                                    rehypePlugins={[rehypeRaw]}
-                                    components={{
-                                        // This tells ReactMarkdown to use our custom component for the `<think>` tag
-                                        think: ({ node, ...props }: any) => (
-                                            <ThinkingProcess {...props} />
-                                        ),
-                                    } as CustomComponents}
-                                >
-                                    {message.content}
-                                </Markdown>
+                                <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
                             </div>
                         </div>
                     ))
