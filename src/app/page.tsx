@@ -67,12 +67,12 @@ export default function Home() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ stream: true, include_reasoning: includeReasoning, model: model, messages: newMessages })
+            body: JSON.stringify({ stream: true, model: model, messages: newMessages })
         });
 
         if (!resp.ok) {
             setMessages([...newMessages, { role: "assistant", content: "I've encountered an error! Sorry!" }]);
-            throw new Error(`An error occurred. Resp code: ${resp.status}`);
+            console.error(resp)
         }
 
         // Get a text reader from the response body
