@@ -16,6 +16,10 @@ interface ThinkingProcessProps {
   children?: React.ReactNode; // 'children' is the content inside your <think> tag.
 }
 
+type CustomComponents = Components & {
+  think: React.ElementType;
+};
+
 // Now, type your component correctly.
 const ThinkingProcess: React.FC<ThinkingProcessProps> = ({ children }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -35,8 +39,17 @@ const ThinkingProcess: React.FC<ThinkingProcessProps> = ({ children }) => {
 };
 
 export default function Home() {
+    // qwen/qwen3-32b, openai/gpt-oss-120b, openai/gpt-oss-20b, meta-llama/llama-4-maverick-17b-128e-instruct
+    const models = [
+        'qwen/qwen3-32b',
+        'openai/gpt-oss-120b',
+        'openai/gpt-oss-20b',
+        'meta-llama/llama-4-maverick-17b-128e-instruct'
+    ]
     const [messages, setMessages] = useState<Message[]>([]);
     const [messageStringCache, setMessageStringCache] = useState<string>('');
+    const [includeReasoning, setIncludeReasoning] = useState<boolean>(false);
+    const [model, setModel] = useState<string>('openai/gpt-oss-120b');
 
     const sendMessage = async () => {
         // Add the user's message to the state
@@ -54,7 +67,7 @@ export default function Home() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ messages: newMessages, stream: true })
+            body: JSON.stringify({ stream: true, include_reasoning: includeReasoning, model: model, messages: newMessages })
         });
 
         if (!resp.ok) {
@@ -116,7 +129,7 @@ export default function Home() {
                                         think: ({ node, ...props }: any) => (
                                             <ThinkingProcess {...props} />
                                         ),
-                                    } as Components}
+                                    } as CustomComponents}
                                 >
                                     {message.content}
                                 </Markdown>
@@ -132,17 +145,27 @@ export default function Home() {
                 )}
             </div>
             <div className={styles['message-field-combo']}>
-                <textarea 
-                    placeholder="Ask Hack Club AI anything"
-                    value={messageStringCache}
-                    onChange={(e) => {setMessageStringCache(e.target.value)}}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessage();
-                        }
-                    }}
-                />
+                <div className={styles['message-field']}>
+                    <textarea 
+                        placeholder="Ask Hack Club AI anything"
+                        value={messageStringCache}
+                        onChange={(e) => {setMessageStringCache(e.target.value)}}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                sendMessage();
+                            }
+                        }}
+                    />
+                </div>
+                <div>
+                    <label>Model</label>
+                    <select onChange={(e) => setModel(e.target.value)}>
+                        {models.map((model, index) => (
+                            <option value={model} key={index}>{model}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
         </div>
     );

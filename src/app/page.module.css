@@ -8,10 +8,12 @@
     right: 15px;
     background-color: var(--secondary);
     display: flex;
+    flex-direction: column;
     padding: 20px;
     border-radius: 20px;
+    flex: 1;
 }
-.message-field-combo textarea {
+.message-field-combo .message-field textarea {
     font-family: 'TikTok Sans', sans-serif;
     -webkit-appearance: none;
     background-color: var(--secondary);
@@ -19,6 +21,7 @@
     resize: none;
     margin-bottom: none;
     flex: 1;
+    width: 100%;
     outline: none;
 }
 .messages-container {
