@@ -1,45 +1,135 @@
 "use client"
 import Image from "next/image";
 import styles from "./page.module.css";
-import { useState } from "react";
-import Markdown from 'react-markdown'
+import React, { Component, useState } from "react";
+import rehypeRaw from "rehype-raw";
+import Markdown, { Components } from 'react-markdown'
 
 interface Message {
     role: string,
     content: string
 }
 
+// This is the interface for props passed from react-markdown
+interface ThinkingProcessProps {
+  node?: any; // The 'node' property is often not used, but it's passed.
+  children?: React.ReactNode; // 'children' is the content inside your <think> tag.
+}
+
+// Now, type your component correctly.
+const ThinkingProcess: React.FC<ThinkingProcessProps> = ({ children }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpansion = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <div>
+      <button onClick={toggleExpansion}>
+        Thinking... {isExpanded ? '▲' : '▼'}
+      </button>
+      {isExpanded && <div className={styles['thonk-child']}>{children}</div>}
+    </div>
+  );
+};
+
 export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [messageStringCache, setMessageStringCache] = useState<string>('');
 
     const sendMessage = async () => {
-        const newMessages = [...messages, { role: "user", content: messageStringCache }];
+        // Add the user's message to the state
+        const userMessage = { role: "user", content: messageStringCache };
+        const newMessages = [...messages, userMessage];
         setMessages(newMessages);
         setMessageStringCache('');
+
+        // Add a placeholder for the assistant's response to display immediately
+        const assistantMessagePlaceholder = { role: "assistant", content: "" };
+        setMessages([...newMessages, assistantMessagePlaceholder]);
+
         const resp = await fetch('https://ai.hackclub.com/chat/completions', {
             method: 'POST',
             headers: {
-            "Content-Type": "application/json"
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ messages: newMessages })
+            body: JSON.stringify({ messages: newMessages, stream: true })
         });
+
         if (!resp.ok) {
             setMessages([...newMessages, { role: "assistant", content: "I've encountered an error! Sorry!" }]);
-            throw new Error(`An error occured. Resp code: ${resp.status}`);
+            throw new Error(`An error occurred. Resp code: ${resp.status}`);
         }
-        const json = await resp.json();
-        console.log(json);
-        setMessages([...newMessages, { role: "assistant", content: json.choices[0].message.content }]);
+
+        // Get a text reader from the response body
+        const reader = resp.body?.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        let done = false;
+        let accumulatedContent = "";
+
+        // Loop through the streaming chunks
+        while (!done) {
+            const { value, done: doneReading } = await reader!.read();
+            done = doneReading;
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+                console.log(line)
+                if (line.startsWith("data: ")) {
+                    try {
+                        const data = JSON.parse(line.substring(6));
+                        if (data.choices[0].delta && data.choices[0].delta.content) {
+                            const newContent = data.choices[0].delta.content;
+                            accumulatedContent += newContent;
+
+                            // Update the last message with the new content
+                            setMessages(currentMessages => {
+                                const lastMessageIndex = currentMessages.length - 1;
+                                const updatedMessages = [...currentMessages];
+                                updatedMessages[lastMessageIndex] = {
+                                    ...updatedMessages[lastMessageIndex],
+                                    content: updatedMessages[lastMessageIndex].content + newContent
+                                };
+                                return updatedMessages;
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Failed to parse JSON from stream chunk:", e);
+                    }
+                }
+            }
+        }
     }
     return (
         <div className={styles.page}>
             <div className={styles['messages-container']}>
-                {messages.map((message, index) => (
-                    <div className={`${styles.message} ${styles[message.role]}`} key={index}>
-                        <div><Markdown>{message.content}</Markdown></div>
+                {messages.length > 0 && (
+                    messages.map((message, index) => (
+                        <div className={`${styles.message} ${styles[message.role]}`} key={index}>
+                            <div>
+                                <Markdown
+                                    rehypePlugins={[rehypeRaw]}
+                                    components={{
+                                        // This tells ReactMarkdown to use our custom component for the `<think>` tag
+                                        think: ({ node, ...props }: any) => (
+                                            <ThinkingProcess {...props} />
+                                        ),
+                                    } as Components}
+                                >
+                                    {message.content}
+                                </Markdown>
+                            </div>
+                        </div>
+                    ))
+                )}
+                {messages.length == 0 && (
+                    <div className={styles['no-msgs']}>
+                        <h1>I am Hack Club AI</h1>
+                        <span>Ask me anything, but nothing inappropriate!</span>
                     </div>
-                ))}
+                )}
             </div>
             <div className={styles['message-field-combo']}>
                 <textarea 
